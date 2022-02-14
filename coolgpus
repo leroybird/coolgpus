@@ -17,7 +17,7 @@ are a lot more distracting than steady fan noise.
 I can't claim it's optimal, but it Works For My Machine (TM). Full load is about 
 75C and 80%.
 ''')
-parser.add_argument('--temp', nargs='+', default=[55, 80], type=float, help='The temperature ranges where the fan speed will increase linearly')
+parser.add_argument('--temp', nargs='+', default=[55, 70], type=float, help='The temperature ranges where the fan speed will increase linearly')
 parser.add_argument('--speed', nargs='+', default=[30, 99], type=float, help='The fan speed ranges')
 parser.add_argument('--hyst', nargs='?', default=2, type=float, help='The hysteresis gap. Large gaps will reduce how often the fan speed is changed, but might mean the fan runs faster than necessary')
 parser.add_argument('--kill', action='store_true', default=False, help='Whether to kill existing Xorg sessions')
@@ -250,7 +250,11 @@ def manage_fans(displays):
                 s, l, u = target_speed(speeds[bus], temp)
                 if s != speeds[bus]:
                     print('GPU {}, {}C -> [{}%-{}%]. Setting speed to {}%'.format(display, temp, l, u, s))
-                    power_setting(display, str(args.power_lim))
+                    
+                    # By default we don't want to change the power limit
+                    if int(args.power_lim) > 0:
+                        power_setting(display, str(args.power_lim))
+
                     set_speed(display, s)
                     set_memory_overclock(display)
                     speeds[bus] = s
